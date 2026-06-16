@@ -90,6 +90,22 @@ Key behaviors:
 - Search/filter query params: `search`, `manufacturer`, `dosage_form`, `dea_schedule`, `min_price`, `max_price`, `page`.
 - `?dea_schedule=` (empty) filters non-controlled drugs (`dea_schedule` is null).
 
+Stretch endpoints:
+
+- `GET /api/drugs/schedule-summary/` — counts per DEA schedule (`II/III/IV/V/non_controlled`).
+- `POST /api/drugs/batch/` — idempotent upsert of many records by NDC; returns `{created, updated, errors, results}` and never aborts the batch on a single bad row.
+- `GET /api/audit/` and `GET /api/drugs/{id}/audit/` — immutable change history (newest first, paginated).
+
+## Pharmacy-Context Feature: Controlled-Substance (DEA) Management + Audit Log
+
+The chosen pharmacy-domain feature is **controlled-substance oversight**, because DEA-scheduled drugs carry the highest regulatory and diversion risk in a pharmacy's catalog:
+
+- **Schedule-aware catalog** — color-coded `C-II`–`C-V` / Non-controlled badges, plus a summary panel that shows counts per schedule and one-click filtering (including non-controlled).
+- **Schedule II guardrails** — the most tightly controlled tier requires typing `CONFIRM` to delete, surfaces an explicit warning on edit, and emits a structured `WARNING` server log (`controlled_substance_mutation`) on every Schedule II update/delete for monitoring.
+- **Immutable audit log** — every create/update/delete is recorded with a field-level diff, actor, and timestamp (no update/delete on audit rows), viewable globally at `/audit` and per-drug via the edit screen's **History** tab.
+
+**Why it matters:** pharmacies are accountable to DEA recordkeeping and audit requirements; an immutable, queryable change trail and extra friction around Schedule II mutations directly support compliance, internal review, and diversion investigations — far more valuable in this domain than generic CRUD polish.
+
 ## Live Demo Deployment
 
 The application is deployed as:

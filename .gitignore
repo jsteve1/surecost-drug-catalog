@@ -40,3 +40,13 @@ yarn-error.log*
 *.swo
 .DS_Store
 Thumbs.db
+
+# Internal AI/build artifacts — not for the public repo / reviewer
+cursor_handoff_document_review.md
+cursor_*_export.md
+claude-session-surecost-demo.txt
+ORCHESTRATION_PLAN.md
+HANDOFF.md
+buildout.md
+BUILD_WITH_CURSOR.md
+hermes/
