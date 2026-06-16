@@ -8,6 +8,15 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 // Recognisable NDC that won't conflict with real seed data
 const DEMO_NDC = "99998-0001-01";
 
+// Batch demo payload: two valid rows + one deliberately invalid NDC to show that
+// a bad row is reported as an error without aborting the batch. Auto-deleted after.
+const DEMO_BATCH = [
+  { ndc: "99998-0010-10", drug_name: "Batch Demo A (auto-deleted)", manufacturer: "SureCost Demo", dosage_form: "TABLET", strength: "5mg", package_size: 30, unit_price: "4.00", dea_schedule: null },
+  { ndc: "99998-0011-11", drug_name: "Batch Demo B (auto-deleted)", manufacturer: "SureCost Demo", dosage_form: "CAPSULE", strength: "10mg", package_size: 60, unit_price: "8.50", dea_schedule: null },
+  { ndc: "BAD-NDC",       drug_name: "Batch Demo C (invalid NDC)",  manufacturer: "SureCost Demo", dosage_form: "TABLET", strength: "1mg", package_size: 10, unit_price: "1.00", dea_schedule: null },
+];
+const DEMO_BATCH_SEARCH = "Batch Demo";
+
 interface Result {
   status: number;
   body: unknown;
@@ -19,6 +28,7 @@ interface DemoState {
   createdId: number | null;
   results: Record<string, Result>;
   running: string | null;
+  batchPending: boolean;
 }
 
 const REQUIREMENTS = [
@@ -35,6 +45,7 @@ const REQUIREMENTS = [
   { id: "update",       label: "Partial update (PATCH)" },
   { id: "validation",   label: "Validation — bad NDC format returns 400 with field_errors" },
   { id: "delete",       label: "Delete — 204 No Content" },
+  { id: "batch",        label: "Batch upsert — array ingest, per-row create/update/error (stretch)" },
 ] as const;
 
 type ReqId = typeof REQUIREMENTS[number]["id"];
@@ -160,6 +171,7 @@ export default function DemoPage() {
     createdId: null,
     results: {},
     running: null,
+    batchPending: false,
   });
   const [runningAll, setRunningAll] = useState(false);
 
@@ -182,6 +194,7 @@ export default function DemoPage() {
   if (r["update"]?.ok) completedReqs.add("update");
   if (r["validation"]?.status === 400) completedReqs.add("validation");
   if (r["delete"]?.status === 204) completedReqs.add("delete");
+  if (r["batch"]?.ok) completedReqs.add("batch");
 
   const createdUrl = state.createdId
     ? `${API_BASE}/drugs/${state.createdId}/`
@@ -209,12 +222,49 @@ export default function DemoPage() {
     }
   }, []);
 
+  const runBatch = useCallback(async () => {
+    setState((prev) => ({ ...prev, running: "batch" }));
+    try {
+      const result = await runRequest("POST", `${API_BASE}/drugs/batch/`, DEMO_BATCH);
+      setState((prev) => ({
+        ...prev,
+        running: null,
+        batchPending: result.ok,
+        results: { ...prev.results, batch: result },
+      }));
+    } finally {
+      setState((prev) => (prev.running === "batch" ? { ...prev, running: null } : prev));
+    }
+  }, []);
+
+  // Delete the batch demo records (looked up by drug_name search, since the
+  // batch response does not return IDs). Leaves the result card in place.
+  const deleteBatchRecords = async () => {
+    const listRes = await runRequest(
+      "GET",
+      `${API_BASE}/drugs/?search=${encodeURIComponent(DEMO_BATCH_SEARCH)}&page_size=25`,
+    );
+    const rows = (listRes.body as { results?: Array<{ id: number }> })?.results ?? [];
+    for (const row of rows) {
+      await runRequest("DELETE", `${API_BASE}/drugs/${row.id}/`);
+    }
+  };
+
+  const cleanupBatch = async () => {
+    await deleteBatchRecords();
+    setState((prev) => {
+      const next = { ...prev.results };
+      delete next.batch;
+      return { ...prev, batchPending: false, results: next };
+    });
+  };
+
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const runAll = async () => {
     setRunningAll(true);
     // Reset prior state
-    setState({ createdId: null, results: {}, running: null });
+    setState({ createdId: null, results: {}, running: null, batchPending: false });
 
     const steps: Array<[string, string, string, object?]> = [
       ["health",       "GET",    `${API_BASE}/health/`],
@@ -265,7 +315,16 @@ export default function DemoPage() {
       setState((prev) => ({ ...prev, running: "delete" }));
       const delResult = await runRequest("DELETE", `${API_BASE}/drugs/${newId}/`);
       setState((prev) => ({ ...prev, running: null, createdId: null, results: { ...prev.results, delete: delResult } }));
+      await sleep(300);
     }
+
+    // Batch upsert (stretch) — then auto-delete the demo rows, keeping the result visible
+    setState((prev) => ({ ...prev, running: "batch" }));
+    const batchResult = await runRequest("POST", `${API_BASE}/drugs/batch/`, DEMO_BATCH);
+    setState((prev) => ({ ...prev, running: null, results: { ...prev.results, batch: batchResult } }));
+    await sleep(300);
+    await deleteBatchRecords();
+    setState((prev) => ({ ...prev, batchPending: false }));
 
     setRunningAll(false);
   };
@@ -405,6 +464,25 @@ export default function DemoPage() {
             body={{ unit_price: "19.99" }} result={r["update"]} running={state.running === "update"}
             disabled={needsId} disabledReason="Run Create first"
             onRun={() => run("update", "PATCH", createdUrl, { unit_price: "19.99" })} />
+        </div>
+
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide">Batch Ingestion (stretch)</h2>
+
+          <DemoCard id="batch" method="POST" title="Batch upsert" url={`${API_BASE}/drugs/batch/`}
+            note="Accepts a JSON array and upserts each row by NDC. Per-row validation: the invalid 3rd row is reported as an error without aborting the batch (expect created: 2, errors: 1). Returns { created, updated, errors, results[] }. Demo rows are auto-deleted."
+            body={DEMO_BATCH} result={r["batch"]} running={state.running === "batch"}
+            onRun={runBatch} />
+
+          {state.batchPending && !runningAll && (
+            <button
+              type="button"
+              onClick={cleanupBatch}
+              className="rounded-md border border-red-300 dark:border-red-700 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+            >
+              Clean up batch demo records
+            </button>
+          )}
         </div>
 
         <div className="space-y-3">
