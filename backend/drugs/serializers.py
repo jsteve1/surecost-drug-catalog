@@ -2,7 +2,7 @@ import re
 
 from rest_framework import serializers
 
-from .models import Drug
+from .models import AuditLog, Drug
 
 NDC_PATTERN = re.compile(r"^\d{5}-\d{4}-\d{2}$")
 
@@ -39,3 +39,19 @@ class DrugSerializer(serializers.ModelSerializer):
         if value < 0:
             raise serializers.ValidationError("Unit price must be non-negative.")
         return value
+
+
+class AuditLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AuditLog
+        fields = [
+            "id",
+            "drug",
+            "drug_ndc",
+            "drug_name",
+            "action",
+            "actor",
+            "timestamp",
+            "changes",
+        ]
+        read_only_fields = fields

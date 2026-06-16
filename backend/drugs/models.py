@@ -43,3 +43,30 @@ class Drug(models.Model):
 
     def __str__(self) -> str:
         return f"{self.ndc} — {self.drug_name}"
+
+
+class AuditLog(models.Model):
+    class Action(models.TextChoices):
+        CREATE = "CREATE", "Create"
+        UPDATE = "UPDATE", "Update"
+        DELETE = "DELETE", "Delete"
+
+    drug = models.ForeignKey(
+        Drug,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="audit_logs",
+    )
+    drug_ndc = models.CharField(max_length=13, db_index=True)
+    drug_name = models.CharField(max_length=255)
+    action = models.CharField(max_length=10, choices=Action.choices)
+    actor = models.CharField(max_length=255, default="system")
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    changes = models.JSONField(default=dict)
+
+    class Meta:
+        ordering = ["-timestamp"]
+
+    def __str__(self) -> str:
+        return f"{self.action} {self.drug_ndc} @ {self.timestamp}"
