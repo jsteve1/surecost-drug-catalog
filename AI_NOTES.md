@@ -19,3 +19,18 @@ A second issue appeared in the frontend: `create-next-app` refused a non-empty `
 **Less effective:** Trying to combine zod `transform()` on `dea_schedule` with `zodResolver` caused TypeScript resolver mismatches — simpler to keep form values as `"" | "II" | ...` and map to `null` in a `toDrugInput()` helper. Pinning Python 3.12 in Docker while the local venv used 3.14 required relying on Docker for the canonical runtime.
 
 Overall, AI accelerated the MVP substantially; human-specified invariants (NDC format, idempotent POST, 109 seed records) needed explicit verification steps rather than assuming generated code was correct.
+
+## E18 Delivery & Hardening — Version decisions
+
+**Django version (E18.F1.S1):** Keeping **Django 6.0.6** rather than downgrading to 5.2 LTS.
+- The MVP was built and verified on Django 6.0.6; downgrading would introduce unnecessary re-testing risk.
+- spec.md `tech_stack.backend.framework` updated to "Django 6.x + Django REST Framework" to match reality.
+- Python runtime: standardized on **3.12** (Dockerfile `python:3.12-slim`; local venv on `/usr/bin/python3.12`). The original dev used Python 3.14 locally; the canonical runtime is 3.12 per Docker and CI.
+
+**Docker (E18.F2):** Docker was not pre-installed on the self-hosted server. Installed `docker.io` + `docker-compose-plugin` via apt and ran `docker compose up --build` to satisfy E11's Definition-of-Done item 7.
+
+**Stretch epics E12–E17 (E18.F3):** See SDLC.md for per-epic dispositions.
+
+**Public API (E23):** The API is intentionally **open** (no auth) for the demo. Anyone with the URL can read or write. Risk acknowledged; optional Cloudflare rate-limiting recommended for production. The live demo depends on the self-hosted server running the backend and `cloudflared`.
+
+**E20 vs E15:** The addendum's E20 (API test suite) supersedes spec.md's E15 (backend tests stretch). E15 is marked deferred/replaced.

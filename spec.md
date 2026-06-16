@@ -25,7 +25,7 @@ This document is the **build recipe** for the SureCost take-home drug catalog ap
   "tech_stack": {
     "backend": {
       "language": "Python 3.12",
-      "framework": "Django 5.x + Django REST Framework",
+      "framework": "Django 6.x + Django REST Framework",
       "database_local": "SQLite",
       "database_docker": "PostgreSQL 16",
       "packages": [

@@ -20,15 +20,17 @@ Full-stack pharmacy drug catalog for the SureCost take-home challenge: NDC-keyed
 
 ## Prerequisites
 
-- **Docker path (recommended):** Docker Desktop / Docker Engine + Compose v2
-- **Local path:** Python 3.12+, Node.js 20+, npm
+- **Docker path (recommended):** Docker Engine + `docker-compose` (v1) or `docker compose` plugin (v2)
+- **Local path:** Python 3.12, Node.js 20+, npm
 
 ## Docker Setup (primary)
 
-From the repository root:
+The canonical compose file is at the **repository root** (`docker-compose.yml`). Run from the repo root:
 
 ```bash
-docker compose up --build
+docker-compose up --build   # docker-compose v1
+# or
+docker compose up --build   # docker compose v2 plugin
 ```
 
 | Service  | URL |
@@ -105,7 +107,7 @@ Additional hardening: secrets manager for `SECRET_KEY`, HTTPS termination, authn
 ```
 backend/     Django REST API
 frontend/    Next.js UI
-infra/       Compose reference (see root docker-compose.yml)
+infra/       Infrastructure notes (see root docker-compose.yml for canonical compose)
 seed_drugs.json   Immutable seed data (109 records)
 ```
 
