@@ -1,61 +1,112 @@
 # SureCost Drug Catalog
 
-## Overview
-
-Full-stack pharmacy drug catalog for the SureCost take-home challenge. Manages NDC-keyed drug records with CRUD, search/filter, seed ingestion, and idempotent creates.
+Full-stack pharmacy drug catalog for the SureCost take-home challenge: NDC-keyed drug records with CRUD, search/filter, idempotent creates, seed ingestion, and Docker-based deployment.
 
 ## Architecture
 
 ```
 ┌─────────────┐     REST API      ┌──────────────────┐
 │  Next.js    │ ◄──────────────► │  Django + DRF    │
-│  Frontend   │   /api/drugs/    │  Backend         │
+│  :3000      │   /api/drugs/    │  :8000           │
 └─────────────┘                   └────────┬─────────┘
                                            │
                                     ┌──────▼──────┐
-                                    │ SQLite /    │
                                     │ PostgreSQL  │
+                                    │   :5432     │
                                     └─────────────┘
 ```
 
-**Tech stack:** Python 3.12 · Django 5.x · Django REST Framework · Next.js (App Router) · TypeScript · Tailwind CSS · TanStack Query · Docker
+**Stack:** Python 3.12 · Django · DRF · Next.js (App Router) · TypeScript · Tailwind · TanStack Query · Docker
 
 ## Prerequisites
 
-- Python 3.12+
-- Node.js 20+
-- Docker & Docker Compose (for containerized setup)
+- **Docker path (recommended):** Docker Desktop / Docker Engine + Compose v2
+- **Local path:** Python 3.12+, Node.js 20+, npm
 
-## Local Setup
+## Docker Setup (primary)
 
-_TBD — see E11 for complete instructions._
-
-1. Copy `.env.example` to `.env` and fill in values.
-2. Backend: `cd backend`, create venv, `pip install -r requirements.txt`, `migrate`, `load_seed`, `runserver`.
-3. Frontend: `cd frontend`, `npm install`, copy env, `npm run dev`.
-
-## Docker Setup
-
-_TBD — see E11 for complete instructions._
+From the repository root:
 
 ```bash
 docker compose up --build
 ```
 
+| Service  | URL |
+|----------|-----|
+| Frontend | http://localhost:3000 |
+| API      | http://localhost:8000/api/drugs/ |
+| Health   | http://localhost:8000/api/health/ |
+| OpenAPI  | http://localhost:8000/api/docs/ |
+
+On startup the backend runs migrations and loads all **109** seed records from `seed_drugs.json`.
+
+## Local Development
+
+### 1. Environment
+
+```bash
+cp .env.example .env
+```
+
+For frontend local dev:
+
+```bash
+cp .env.example frontend/.env.local
+# Ensure NEXT_PUBLIC_API_URL=http://localhost:8000/api
+```
+
+### 2. Backend
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py load_seed
+python manage.py runserver
+```
+
+### 3. Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:3000 — the UI proxies requests to the API via `NEXT_PUBLIC_API_URL`.
+
 ## API Docs
 
-OpenAPI schema and interactive docs available at:
+- **OpenAPI schema:** `GET /api/schema/`
+- **Swagger UI:** `GET /api/docs/`
 
-- Schema: `http://localhost:8000/api/schema/`
-- Swagger UI: `http://localhost:8000/api/docs/`
+Key behaviors:
+
+- `POST /api/drugs/` with an existing NDC returns **200** with the existing record (no duplicate row).
+- Search/filter query params: `search`, `manufacturer`, `dosage_form`, `dea_schedule`, `min_price`, `max_price`, `page`.
+- `?dea_schedule=` (empty) filters non-controlled drugs (`dea_schedule` is null).
 
 ## Production Readiness
 
-_TBD — to be completed in E11._
+This MVP is suitable for demo and local evaluation. For SureCost-scale production across many pharmacy locations:
 
-- [ ] Environment variable documentation
-- [ ] Health check endpoint
-- [ ] Structured logging
-- [ ] Error handling envelope
-- [ ] CORS configuration
-- [ ] Database migrations in Docker entrypoint
+1. **Read replicas + connection pooling** — Route catalog reads to replicas; use PgBouncer (or RDS Proxy) so hundreds of concurrent pharmacy clients do not exhaust Postgres connections during peak formulary lookups.
+
+2. **NDC normalization ingestion pipeline** — Ingest vendor catalogs via async workers (SQS/Celery) with validation, deduplication on NDC, and dead-letter queues for malformed rows before they hit the primary catalog API.
+
+3. **Audit retention & compliance** — Persist immutable change logs (stretch epic) to WORM storage or partitioned tables with tiered retention for DEA Schedule II mutations, aligned with pharmacy regulatory review windows.
+
+Additional hardening: secrets manager for `SECRET_KEY`, HTTPS termination, authn/authz per pharmacy tenant, rate limiting, and health-checked rolling deploys.
+
+## Project Layout
+
+```
+backend/     Django REST API
+frontend/    Next.js UI
+infra/       Compose reference (see root docker-compose.yml)
+seed_drugs.json   Immutable seed data (109 records)
+```
+
+See [`spec.md`](spec.md) for the full build recipe and [`AGENTS.md`](AGENTS.md) for agent conventions.
