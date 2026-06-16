@@ -14,7 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN chmod +x entrypoint.sh
+# Strip CR from line endings (Windows checkouts can introduce CRLF, which breaks the shebang) and make executable
+RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
 
 EXPOSE 8000
 
