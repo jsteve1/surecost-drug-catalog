@@ -10,7 +10,7 @@
 
 | Tier | Name | Auth | Database | Availability | Monthly cost (order of magnitude) | Complexity |
 |------|------|------|----------|--------------|-----------------------------------|------------|
-| **0** | Current demo | None (open API) | SQLite on self-hosted node | Best-effort; single-node | ~$0 (existing hardware + free tiers) | Low |
+| **0** | Current demo | None (open API) | PostgreSQL via Docker Compose (self-hosted) | Best-effort; single-node | ~$0 (existing hardware + free tiers) | Low |
 | **1** | Small production | API keys or basic auth behind reverse proxy | PostgreSQL on same VPS | Single-node; manual failover | $20–80 (one VPS + domain) | Low–medium |
 | **2** | Mid-scale | OAuth 2.0 / JWT + API keys for integrations | Managed RDS / Cloud SQL | Multi-replica; rolling deploys | $200–2,000+ | Medium–high |
 | **3** | Enterprise / HIPAA | mTLS + SSO (SAML/OIDC); no public write API | Managed Postgres with encryption at rest | Multi-AZ, autoscaling, CDN | $2,000–20,000+ | High |
@@ -19,14 +19,14 @@
 
 ## Tier 0 — Current demo architecture
 
-The live demo splits frontend and backend across two hosting surfaces connected by HTTPS and CORS. There is **no authentication layer** between the public internet and the Django REST API.
+The live demo splits frontend and backend across two hosting surfaces connected by HTTPS and CORS. There is **no authentication layer** between the public internet and the Django REST API. The self-hosted backend runs the **same Docker Compose stack as local development** — a `backend` container (gunicorn + Django) plus a PostgreSQL `db` container — published on `127.0.0.1:8100` behind a Cloudflare named tunnel.
 
 ### Request flow
 
 ```mermaid
 flowchart LR
-    subgraph Internet
-        U[Browser / API client]
+    subgraph Internet["Internet"]
+        U["Browser / API client"]
     end
 
     subgraph GitHub["GitHub Pages"]
@@ -36,13 +36,17 @@ flowchart LR
 
     subgraph Cloudflare["Cloudflare Edge"]
         WAF0["Optional rate limit"]
-        TUN["Named tunnel<br/>cloudflared"]
+        TUN["Named tunnel (cloudflared)<br/>api.gaspartech.com → 127.0.0.1:8100"]
     end
 
-    subgraph SelfHosted["Self-hosted server"]
-        GUN["gunicorn :8100<br/>systemd user service"]
-        DJ["Django + DRF"]
-        SQL["SQLite prod.sqlite3"]
+    subgraph SelfHosted["Self-hosted server — Docker Compose"]
+        subgraph BE["backend container"]
+            GUN["gunicorn :8000<br/>(published on 127.0.0.1:8100)"]
+            DJ["Django + DRF"]
+        end
+        subgraph DB["db container"]
+            PG["PostgreSQL 16"]
+        end
     end
 
     U -->|HTTPS GET /drugs| CF_DNS
@@ -52,7 +56,7 @@ flowchart LR
     WAF0 --> TUN
     TUN --> GUN
     GUN --> DJ
-    DJ --> SQL
+    DJ --> PG
 ```
 
 ### Component summary
@@ -61,10 +65,10 @@ flowchart LR
 |-----------|------------|-------|
 | Frontend | GitHub Pages static export | Deployed by `.github/workflows/pages.yml` on push to `develop` |
 | Frontend domain | `app.gaspartech.com` | CNAME in `frontend/public/CNAME` |
-| API edge | Cloudflare named tunnel | `cloudflared` systemd service on the self-hosted server |
-| API process | gunicorn on port 8100 | `surecost-backend.service` (systemd user unit) |
-| Database | SQLite | Single-file `backend/prod.sqlite3`; not ideal for concurrent writes |
-| CI | GitHub Actions | `ci.yml`: ruff, pytest (42 tests), eslint, build, Docker image build |
+| API edge | Cloudflare named tunnel | `cloudflared` service on the self-hosted server → `127.0.0.1:8100` |
+| API process | gunicorn in the `backend` container | `docker compose` service; gunicorn binds `:8000`, published on `127.0.0.1:8100` |
+| Database | PostgreSQL 16 | `db` container (Docker Compose); migrations + 109 seed records loaded on first boot via `entrypoint.sh` |
+| CI | GitHub Actions | `ci.yml`: ruff, pytest, eslint, build, Docker image build |
 | Auth | **None** | All CRUD endpoints are public; documented in `README.md` and `AI_NOTES.md` |
 
 ### Auth approach
@@ -73,19 +77,19 @@ flowchart LR
 
 ### Database choice
 
-SQLite suits a single-process demo with low write concurrency. Docker Compose locally uses PostgreSQL (`docker-compose.yml`), but the live server uses SQLite for operational simplicity.
+**PostgreSQL 16**, run as the `db` container from the same `docker-compose.yml` used for local development. The self-hosted demo no longer uses SQLite — moving to the Compose stack gave the live server identical bootstrap behavior to local (Postgres + auto-migrate + auto-seed) and removed SQLite's single-writer and relative-path-database pitfalls. Data lives in the `postgres_data` Docker volume.
 
 ### Availability
 
 - **Frontend:** High — GitHub Pages CDN is always on.
-- **Backend:** Best-effort — depends on server uptime, gunicorn health, and tunnel connectivity. If the server reboots without the systemd service, the API is unreachable while the static UI may still load and show network errors.
+- **Backend:** Best-effort — depends on server uptime, Docker daemon health, and tunnel connectivity. Compose's `restart` policy brings the `backend` and `db` containers back after a reboot; until they are healthy the static UI may still load and show network errors.
 
 ### Cost and complexity tradeoffs
 
 | Advantage | Limitation |
 |-----------|------------|
 | Near-zero incremental hosting cost | No SLA; single point of failure (single node) |
-| Fast to stand up for a take-home demo | SQLite limits concurrent writers |
+| `docker compose up --build` reproduces the live stack exactly (Postgres + gunicorn) | All containers share one host — no horizontal redundancy |
 | No secrets management overhead for API auth | Open write API is unsuitable for real PHI or production catalog data |
 | CI and Pages are free for public/private repos | `NEXT_PUBLIC_API_URL` is build-time — API domain changes require redeploy |
 
@@ -358,8 +362,8 @@ flowchart LR
 ## Migration path from current demo
 
 1. **Immediate hardening (no code deploy):** Enable Cloudflare rate limiting on `api.gaspartech.com`; restrict `POST`/`DELETE` by path at the edge if read-only demo is sufficient.
-2. **Small production:** Move backend to a VPS; switch `DATABASE_URL` to PostgreSQL; add nginx/Caddy with Let's Encrypt; implement DRF `APIKeyAuthentication` for write operations.
-3. **Mid-scale:** Containerize with existing Dockerfiles; deploy to Kubernetes; adopt managed RDS; add Redis for cache; move frontend to CDN-backed static or SSR hosting.
+2. **Small production:** Move the existing Compose stack to a managed VPS (PostgreSQL is already in place via Compose); add nginx/Caddy with Let's Encrypt; implement DRF `APIKeyAuthentication` for write operations; optionally point `DATABASE_URL` at a managed Postgres for off-box backups and point-in-time recovery.
+3. **Mid-scale:** Reuse the existing Dockerfiles; deploy to Kubernetes; adopt managed RDS; add Redis for cache; move frontend to CDN-backed static or SSR hosting.
 4. **Enterprise:** Place backend in private subnets; enable encryption at rest; implement audit log (E13); sign BAA; remove public write routes from the internet-facing gateway.
 
 ---
@@ -369,7 +373,7 @@ flowchart LR
 | Document | Relevance |
 |----------|-----------|
 | [`AI_NOTES.md`](../AI_NOTES.md) | Rationale for open API on the demo |
-| [`docker-compose.yml`](../docker-compose.yml) | Reference Postgres + full-stack layout for Tier 1 |
+| [`docker-compose.yml`](../docker-compose.yml) | The actual Tier 0 self-hosted stack (PostgreSQL + gunicorn); also the reference layout for Tier 1 |
 | [`spec.md`](../spec.md) | API contract and domain invariants (unchanged across tiers) |
 
 ---

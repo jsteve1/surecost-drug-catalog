@@ -11,27 +11,27 @@ The work splits into three phases: **MVP** (required epics E1–E11), **delivery
 ```mermaid
 flowchart LR
     subgraph MVP["Phase 1 — MVP (Cursor)"]
-        E1[E1 Foundation]
-        E2[E2–E6 Backend]
-        E3[E7–E10 Frontend]
-        E4[E11 Compose + Docs]
+        E1["E1 Foundation"]
+        E2["E2–E6 Backend"]
+        E3["E7–E10 Frontend"]
+        E4["E11 Compose + Docs"]
     end
 
     subgraph Delivery["Phase 2 — Delivery (Claude Code)"]
-        E18[E18 Versions + Docker]
-        E19[E19 GitHub repo]
-        E20[E20 API tests]
-        E21[E21 CI]
-        E22[E22 GitHub Pages]
-        E23[E23 Cloudflare tunnel]
+        E18["E18 Versions + Docker"]
+        E19["E19 GitHub repo"]
+        E20["E20 API tests"]
+        E21["E21 CI"]
+        E22["E22 GitHub Pages"]
+        E23["E23 Cloudflare tunnel"]
     end
 
     subgraph Stretch["Phase 3 — Stretch"]
-        E24[E24 UI polish]
-        E25[E25 DEA mgmt]
-        E26[E26 Audit log]
-        E27[E27 Batch ingest]
-        E29[E29 Frontend tests]
+        E24["E24 UI polish"]
+        E25["E25 DEA mgmt"]
+        E26["E26 Audit log"]
+        E27["E27 Batch ingest"]
+        E29["E29 Frontend tests"]
     end
 
     E1 --> E2 --> E3 --> E4
@@ -52,17 +52,18 @@ Every story follows the same gate defined in [`AGENTS.md`](../AGENTS.md):
 
 ```mermaid
 flowchart TD
-    SPEC["spec.md / spec_addendum*.md\n(story + depends_on + acceptance + verify)"]
-    READY{All depends_on done?}
-    IMPL[Implement in repo\n(backend/ or frontend/)]
-    VERIFY[Run verify steps\npytest / lint / build / manual]
-    AC{All acceptance_criteria met?}
-    COMMIT[Conventional commit\nfeat: / fix: / test: / docs:]
-    SDLC[Update traceability]
-    DONE[Story Done]
+    SPEC["spec.md / spec_addendum*.md<br/>(story + depends_on + acceptance + verify)"]
+    READY{"All depends_on done?"}
+    IMPL["Implement in repo<br/>(backend/ or frontend/)"]
+    VERIFY["Run verify steps<br/>pytest / lint / build / manual"]
+    AC{"All acceptance_criteria met?"}
+    COMMIT["Conventional commit<br/>feat: / fix: / test: / docs:"]
+    SDLC["Update traceability"]
+    DONE["Story Done"]
+    WAIT["Wait / pick another story"]
 
     SPEC --> READY
-    READY -->|no| WAIT[Wait / pick another story]
+    READY -->|no| WAIT
     READY -->|yes| IMPL
     IMPL --> VERIFY
     VERIFY --> AC
@@ -80,19 +81,22 @@ flowchart TD
 
 ```mermaid
 flowchart TB
-    HUMAN[Human — product owner / reviewer]
-    CURSOR[Cursor Composer / Auto\nMVP E1–E11]
-    CLAUDE[Claude Code (self-hosted)\nE18–E23 delivery]
-    AGENTS[Parallel sub-agents\nE24+ stretch]
-    CI[GitHub Actions CI\nruff + pytest + eslint + build]
-    LIVE[Live demo\napp.gaspartech.com + api.gaspartech.com]
+    HUMAN["Human — product owner / reviewer"]
+    CURSOR["Cursor Composer / Auto<br/>MVP E1–E11"]
+    CLAUDE["Claude Code (self-hosted)<br/>E18–E23 delivery"]
+    AGENTS["Parallel sub-agents<br/>E24+ stretch"]
+    CI["GitHub Actions CI<br/>ruff + pytest + eslint + build"]
+    LIVE["Live demo<br/>app.gaspartech.com + api.gaspartech.com"]
+    MVP["MVP complete"]
+    DELIVERY["Pages + tunnel + dark mode"]
+    STRETCH["DEA + audit + batch + tests"]
 
     HUMAN -->|kickoff brief| CURSOR
-    CURSOR -->|build session| MVP[MVP complete]
+    CURSOR -->|build session| MVP
     HUMAN -->|delivery phase| CLAUDE
-    CLAUDE -->|delivery session| DELIVERY[Pages + tunnel + dark mode]
+    CLAUDE -->|delivery session| DELIVERY
     HUMAN -->|stretch phase| AGENTS
-    AGENTS --> STRETCH[DEA + audit + batch + tests]
+    AGENTS --> STRETCH
     MVP --> CI
     DELIVERY --> CI
     STRETCH --> CI
@@ -122,11 +126,11 @@ From [`AI_NOTES.md`](../AI_NOTES.md):
 
 ```mermaid
 flowchart LR
-    LOCAL[Local: migrate + load_seed + runserver]
-    DOCKER[Docker compose full stack]
-    TESTS[pytest 62+ / vitest / playwright]
-    CI[GitHub Actions on every push]
-    LIVE[Production-like demo URLs]
+    LOCAL["Local: migrate + load_seed + runserver"]
+    DOCKER["Docker compose full stack"]
+    TESTS["pytest 62+ / vitest / playwright"]
+    CI["GitHub Actions on every push"]
+    LIVE["Production-like demo URLs"]
 
     LOCAL --> TESTS
     DOCKER --> TESTS
