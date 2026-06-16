@@ -16,7 +16,7 @@ interface DrugFormProps {
 }
 
 const inputClassName =
-  "w-full rounded-md border border-slate-300 px-3 py-2 text-sm";
+  "w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm";
 
 export function DrugForm({
   defaultValues,
@@ -69,10 +69,10 @@ export function DrugForm({
   return (
     <form
       onSubmit={submit}
-      className="space-y-4 rounded-lg border border-slate-200 bg-white p-6"
+      className="space-y-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6"
     >
       {globalError && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded-md bg-red-50 dark:bg-red-900/20 px-3 py-2 text-sm text-red-700 dark:text-red-400">
           {globalError}
         </p>
       )}
@@ -81,7 +81,7 @@ export function DrugForm({
         <input
           {...register("ndc")}
           readOnly={ndcReadOnly}
-          className={`${inputClassName} font-mono disabled:bg-slate-100`}
+          className={`${inputClassName} font-mono disabled:bg-slate-100 dark:disabled:bg-slate-700`}
         />
       </Field>
 
@@ -159,10 +159,10 @@ function Field({
 }) {
   return (
     <label className="block text-sm">
-      <span className="mb-1 block font-medium text-slate-700">{label}</span>
+      <span className="mb-1 block font-medium text-slate-700 dark:text-slate-300">{label}</span>
       {children}
       {error && (
-        <span className="mt-1 block text-xs text-red-600">{error}</span>
+        <span className="mt-1 block text-xs text-red-600 dark:text-red-400">{error}</span>
       )}
     </label>
   );

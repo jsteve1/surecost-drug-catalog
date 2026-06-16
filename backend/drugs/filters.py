@@ -27,7 +27,7 @@ class _DeaScheduleFilter(django_filters.CharFilter):
 
 class DrugFilterSet(django_filters.FilterSet):
     search = django_filters.CharFilter(method="filter_search")
-    manufacturer = django_filters.CharFilter(lookup_expr="iexact")
+    manufacturer = django_filters.CharFilter(lookup_expr="icontains")
     dosage_form = django_filters.CharFilter(lookup_expr="iexact")
     dea_schedule = _DeaScheduleFilter()
     min_price = django_filters.NumberFilter(field_name="unit_price", lookup_expr="gte")

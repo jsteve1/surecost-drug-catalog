@@ -52,7 +52,7 @@ function EditDrugContent() {
   return (
     <AppShell>
       <div className="mx-auto max-w-2xl space-y-4">
-        <h1 className="text-2xl font-semibold text-slate-900">Edit Drug</h1>
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Edit Drug</h1>
         <DrugForm
           ndcReadOnly
           submitLabel="Save changes"

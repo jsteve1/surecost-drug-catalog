@@ -24,8 +24,8 @@ export function DrugsPageClient() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Drug Catalog</h1>
-            <p className="text-sm text-slate-500">
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Drug Catalog</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Search and manage pharmacy inventory records.
             </p>
           </div>
@@ -34,7 +34,7 @@ export function DrugsPageClient() {
         <DrugFilters filters={filters} onChange={setFilters} />
 
         {query.isError && (
-          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-400">
             {query.error instanceof Error
               ? query.error.message
               : "Failed to load drugs"}

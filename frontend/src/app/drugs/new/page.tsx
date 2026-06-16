@@ -19,7 +19,7 @@ export default function NewDrugPage() {
   return (
     <AppShell>
       <div className="mx-auto max-w-2xl space-y-4">
-        <h1 className="text-2xl font-semibold text-slate-900">Add Drug</h1>
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Add Drug</h1>
         <DrugForm submitLabel="Create drug" onSubmit={handleSubmit} />
       </div>
     </AppShell>
