@@ -1,23 +1,28 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { use } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { DrugForm } from "@/components/DrugForm";
 import { useDrug, useUpdateDrug } from "@/lib/hooks/useDrugs";
 import { toDrugInput, type DrugFormValues } from "@/lib/validations/drug";
 
-export default function EditDrugPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
-  const drugId = Number(id);
+function EditDrugContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+  const drugId = id ? Number(id) : NaN;
   const router = useRouter();
   const drugQuery = useDrug(drugId);
   const updateDrug = useUpdateDrug(drugId);
+
+  if (!id || isNaN(drugId)) {
+    return (
+      <AppShell>
+        <p className="text-red-600">Missing drug ID.</p>
+      </AppShell>
+    );
+  }
 
   const handleSubmit = async (values: DrugFormValues) => {
     const { ndc, ...rest } = toDrugInput(values);
@@ -65,5 +70,13 @@ export default function EditDrugPage({
         />
       </div>
     </AppShell>
+  );
+}
+
+export default function EditDrugPage() {
+  return (
+    <Suspense fallback={<AppShell><div className="h-40 animate-pulse rounded-lg bg-slate-100" /></AppShell>}>
+      <EditDrugContent />
+    </Suspense>
   );
 }

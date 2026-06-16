@@ -103,7 +103,7 @@ export function DrugTable({ drugs, isLoading }: DrugTableProps) {
                 <td className="px-3 py-3">
                   <div className="flex gap-2">
                     <Link
-                      href={`/drugs/${drug.id}/edit`}
+                      href={`/drugs/edit?id=${drug.id}`}
                       className="text-blue-600 hover:underline"
                     >
                       Edit

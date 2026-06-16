@@ -96,7 +96,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
-    default=["http://localhost:3000"],
+    default=["http://localhost:3000", "http://localhost:3001"],
+)
+
+# Cloudflare Tunnel / reverse-proxy awareness:
+# Tell Django to trust X-Forwarded-Proto so request.is_secure() works behind
+# the Cloudflare edge TLS termination and behind Docker's nginx/gunicorn.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# CSRF trusted origins: needed for Django admin when served via tunnel.
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS",
+    default=["http://localhost:8000"],
 )
 
 REST_FRAMEWORK = {

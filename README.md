@@ -90,6 +90,19 @@ Key behaviors:
 - Search/filter query params: `search`, `manufacturer`, `dosage_form`, `dea_schedule`, `min_price`, `max_price`, `page`.
 - `?dea_schedule=` (empty) filters non-controlled drugs (`dea_schedule` is null).
 
+## Live Demo Deployment
+
+The application is deployed as:
+
+| Component | URL | How |
+|-----------|-----|-----|
+| **Frontend** | https://app.gaspartech.com | GitHub Pages static export (this repo's `develop` → `pages.yml`) |
+| **API** | https://api.gaspartech.com | Django on the self-hosted server, via Cloudflare named tunnel |
+
+**Important:** The live demo is **available only while the self-hosted server is running** the Django backend and `cloudflared`. If the API is unreachable the frontend will show an error banner.
+
+**API auth:** The public API is **intentionally open** (no authentication) for the demo. Anyone with the URL can read or write drug records. This is by design for the take-home evaluation; a production deployment would add auth and Cloudflare rate-limiting.
+
 ## Production Readiness
 
 This MVP is suitable for demo and local evaluation. For SureCost-scale production across many pharmacy locations:
