@@ -16,7 +16,7 @@ interface DrugFormProps {
 }
 
 const inputClassName =
-  "w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm";
+  "w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100";
 
 export function DrugForm({
   defaultValues,
@@ -69,10 +69,10 @@ export function DrugForm({
   return (
     <form
       onSubmit={submit}
-      className="space-y-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6"
+      className="space-y-4 rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900"
     >
       {globalError && (
-        <p className="rounded-md bg-red-50 dark:bg-red-900/20 px-3 py-2 text-sm text-red-700 dark:text-red-400">
+        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
           {globalError}
         </p>
       )}
@@ -81,7 +81,7 @@ export function DrugForm({
         <input
           {...register("ndc")}
           readOnly={ndcReadOnly}
-          className={`${inputClassName} font-mono disabled:bg-slate-100 dark:disabled:bg-slate-700`}
+          className={`${inputClassName} font-mono disabled:bg-neutral-100 dark:disabled:bg-neutral-700`}
         />
       </Field>
 
@@ -140,7 +140,7 @@ export function DrugForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        className="cursor-pointer rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSubmitting ? "Saving..." : submitLabel}
       </button>
@@ -159,7 +159,7 @@ function Field({
 }) {
   return (
     <label className="block text-sm">
-      <span className="mb-1 block font-medium text-slate-700 dark:text-slate-300">{label}</span>
+      <span className="mb-1 block font-medium text-neutral-700 dark:text-neutral-300">{label}</span>
       {children}
       {error && (
         <span className="mt-1 block text-xs text-red-600 dark:text-red-400">{error}</span>

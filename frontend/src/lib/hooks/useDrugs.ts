@@ -26,6 +26,8 @@ export function useCreateDrug() {
     mutationFn: (data: DrugInput) => api.createDrug(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["drugs"] });
+      queryClient.invalidateQueries({ queryKey: ["schedule-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["audit"] });
     },
   });
 }
@@ -37,6 +39,9 @@ export function useUpdateDrug(id: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["drugs"] });
       queryClient.invalidateQueries({ queryKey: ["drug", id] });
+      queryClient.invalidateQueries({ queryKey: ["schedule-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["audit"] });
+      queryClient.invalidateQueries({ queryKey: ["drug-audit", id] });
     },
   });
 }
@@ -47,6 +52,8 @@ export function useDeleteDrug() {
     mutationFn: (id: number) => api.deleteDrug(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["drugs"] });
+      queryClient.invalidateQueries({ queryKey: ["schedule-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["audit"] });
     },
   });
 }

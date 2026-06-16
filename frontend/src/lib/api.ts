@@ -1,10 +1,11 @@
+import type { AuditListResponse, AuditQueryParams } from "@/types/audit";
 import type {
   Drug,
   DrugInput,
   DrugQueryParams,
   PaginatedResponse,
 } from "@/types/drug";
-
+import type { ScheduleSummary } from "@/types/schedule";
 export class ApiError extends Error {
   fieldErrors: Record<string, string[]>;
 
@@ -39,12 +40,16 @@ async function parseResponse<T>(response: Response): Promise<T> {
 
 function buildUrl(
   path: string,
-  params?: Record<string, string | number | undefined>,
+  params?: Record<string, string | number | null | undefined>,
 ): string {
   const url = new URL(`${API_BASE}${path}`);
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== "") {
+      // `null` explicitly sends the param with an empty value (e.g.
+      // `?dea_schedule=` selects non-controlled drugs); `undefined`/`""` omit it.
+      if (value === null) {
+        url.searchParams.set(key, "");
+      } else if (value !== undefined && value !== "") {
         url.searchParams.set(key, String(value));
       }
     });
@@ -55,7 +60,7 @@ function buildUrl(
 async function request<T>(
   path: string,
   options: RequestInit = {},
-  params?: Record<string, string | number | undefined>,
+  params?: Record<string, string | number | null | undefined>,
 ): Promise<T> {
   try {
     const response = await fetch(buildUrl(path, params), {
@@ -76,8 +81,8 @@ async function request<T>(
 
 function serializeDrugQuery(
   params: DrugQueryParams,
-): Record<string, string | number | undefined> {
-  const query: Record<string, string | number | undefined> = {
+): Record<string, string | number | null | undefined> {
+  const query: Record<string, string | number | null | undefined> = {
     page: params.page,
     page_size: params.page_size,
     search: params.search,
@@ -88,7 +93,8 @@ function serializeDrugQuery(
   };
 
   if (params.dea_schedule === "__none__") {
-    query.dea_schedule = "";
+    // null → emit `?dea_schedule=` (empty) so the backend filters to null.
+    query.dea_schedule = null;
   } else if (params.dea_schedule) {
     query.dea_schedule = params.dea_schedule;
   }
@@ -125,5 +131,25 @@ export const api = {
 
   deleteDrug(id: number) {
     return request<void>(`/drugs/${id}/`, { method: "DELETE" });
+  },
+
+  getScheduleSummary() {
+    return request<ScheduleSummary>("/drugs/schedule-summary/");
+  },
+
+  getAudit(params: AuditQueryParams = {}) {
+    return request<AuditListResponse>(
+      "/audit/",
+      {},
+      params as Record<string, string | number | undefined>,
+    );
+  },
+
+  getDrugAudit(id: number, params: AuditQueryParams = {}) {
+    return request<AuditListResponse>(
+      `/drugs/${id}/audit/`,
+      {},
+      params as Record<string, string | number | undefined>,
+    );
   },
 };

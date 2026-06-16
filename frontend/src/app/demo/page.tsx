@@ -75,7 +75,7 @@ function StatusBadge({ status }: { status: number }) {
 
 function MethodBadge({ method }: { method: string }) {
   const cls: Record<string, string> = {
-    GET:    "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300",
+    GET:    "bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300",
     POST:   "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300",
     PATCH:  "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300",
     DELETE: "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300",
@@ -105,34 +105,34 @@ function DemoCard({ method, title, url, note, body, result, running, disabled, d
   const displayUrl = url.replace(API_BASE, "");
 
   return (
-    <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+    <div className="rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-neutral-100 dark:border-neutral-800">
         <div className="flex items-center gap-2 min-w-0">
           <MethodBadge method={method} />
-          <span className="font-medium text-sm text-slate-800 dark:text-slate-200">{title}</span>
-          <span className="font-mono text-xs text-slate-500 dark:text-slate-400 truncate">{displayUrl}</span>
+          <span className="font-medium text-sm text-neutral-800 dark:text-neutral-200">{title}</span>
+          <span className="font-mono text-xs text-neutral-500 dark:text-neutral-400 truncate">{displayUrl}</span>
         </div>
         <button
           type="button"
           onClick={onRun}
           disabled={disabled || running}
           title={disabled ? disabledReason : undefined}
-          className="shrink-0 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="shrink-0 cursor-pointer rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {running ? "Running..." : "Run"}
         </button>
       </div>
 
       {note && (
-        <p className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+        <p className="px-4 py-2 text-xs text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-800/50 border-b border-neutral-100 dark:border-neutral-800">
           {note}
         </p>
       )}
 
       {body && (
-        <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-          <p className="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">Request body</p>
-          <pre className="text-xs font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+        <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-800">
+          <p className="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">Request body</p>
+          <pre className="text-xs font-mono text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
             {JSON.stringify(body, null, 2)}
           </pre>
         </div>
@@ -142,9 +142,9 @@ function DemoCard({ method, title, url, note, body, result, running, disabled, d
         <div className="px-4 py-3">
           <div className="flex items-center gap-2 mb-2">
             <StatusBadge status={result.status} />
-            <span className="text-xs text-slate-500 dark:text-slate-400">{result.ms}ms</span>
+            <span className="text-xs text-neutral-500 dark:text-neutral-400">{result.ms}ms</span>
           </div>
-          <pre className="text-xs font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap max-h-48 overflow-y-auto">
+          <pre className="text-xs font-mono text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap max-h-48 overflow-y-auto">
             {result.body !== null
               ? JSON.stringify(result.body, null, 2)
               : "(no body — " + result.status + ")"}
@@ -292,8 +292,8 @@ export default function DemoPage() {
       <div className="space-y-6 max-w-4xl">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">API Demo</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">API Demo</h1>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Live interactive demo against{" "}
             <span className="font-mono text-xs">{API_BASE}</span>. The API is open — no
             authentication required. Test records are automatically deleted.
@@ -306,7 +306,7 @@ export default function DemoPage() {
             type="button"
             onClick={runAll}
             disabled={runningAll || !!state.running}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="cursor-pointer rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
           >
             {runningAll ? "Running all..." : "Run All (sequential)"}
           </button>
@@ -322,17 +322,17 @@ export default function DemoPage() {
         </div>
 
         {/* Requirements checklist */}
-        <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
-          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Requirements</h2>
+        <div className="rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4">
+          <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3">Requirements</h2>
           <ul className="grid gap-1.5 sm:grid-cols-2">
             {REQUIREMENTS.map((req) => {
               const done = completedReqs.has(req.id);
               return (
                 <li key={req.id} className="flex items-start gap-2 text-xs">
-                  <span className={done ? "text-green-600 dark:text-green-400 font-bold" : "text-slate-300 dark:text-slate-600"}>
+                  <span className={done ? "text-green-600 dark:text-green-400 font-bold" : "text-neutral-300 dark:text-neutral-600"}>
                     {done ? "✓" : "○"}
                   </span>
-                  <span className={done ? "text-slate-700 dark:text-slate-300" : "text-slate-400 dark:text-slate-500"}>
+                  <span className={done ? "text-neutral-700 dark:text-neutral-300" : "text-neutral-400 dark:text-neutral-500"}>
                     {req.label}
                   </span>
                 </li>
@@ -343,7 +343,7 @@ export default function DemoPage() {
 
         {/* Cards */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Read</h2>
+          <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide">Read</h2>
 
           <DemoCard id="health" method="GET" title="Health check" url={`${API_BASE}/health/`}
             note="Confirms API is reachable and Django is up."
@@ -382,7 +382,7 @@ export default function DemoPage() {
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Write</h2>
+          <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide">Write</h2>
 
           <DemoCard id="create" method="POST" title="Create drug" url={`${API_BASE}/drugs/`}
             note="Returns 201 on creation. extended_cost = unit_price × package_size is computed display-only (= $375.00 here)."
@@ -408,7 +408,7 @@ export default function DemoPage() {
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Validation &amp; Error Handling</h2>
+          <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide">Validation &amp; Error Handling</h2>
 
           <DemoCard id="validation" method="POST" title="Bad NDC format → 400" url={`${API_BASE}/drugs/`}
             note="NDC must match #####-####-## (regex ^\\d{5}-\\d{4}-\\d{2}$). Returns 400 with field_errors envelope."
@@ -418,7 +418,7 @@ export default function DemoPage() {
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Delete</h2>
+          <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide">Delete</h2>
 
           <DemoCard id="delete" method="DELETE" title="Delete drug" url={createdUrl}
             note="Returns 204 No Content. The record created above is deleted — no cleanup needed after this."

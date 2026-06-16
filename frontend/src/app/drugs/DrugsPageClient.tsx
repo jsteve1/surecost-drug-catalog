@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
+import { ControlledSubstanceSummary } from "@/components/ControlledSubstanceSummary";
 import { DrugFilters } from "@/components/DrugFilters";
 import { DrugTable } from "@/components/DrugTable";
 import { Pagination } from "@/components/Pagination";
@@ -25,37 +26,32 @@ export function DrugsPageClient() {
 
   return (
     <AppShell>
-      {/*
-        Fixed-height column: heading + filters shrink, table grows and scrolls,
-        pagination stays pinned at the bottom — no full-page scroll needed.
-      */}
       <div className="flex flex-col gap-4" style={{ height: "calc(100vh - 128px)" }}>
-        {/* Heading */}
         <div className="shrink-0">
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Drug Catalog</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">Drug Catalog</h1>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
             Search and manage pharmacy inventory records.
           </p>
         </div>
 
-        {/* Filters */}
+        <div className="shrink-0">
+          <ControlledSubstanceSummary filters={filters} onFilterChange={setFilters} />
+        </div>
+
         <div className="shrink-0">
           <DrugFilters filters={filters} onChange={setFilters} />
         </div>
 
-        {/* Error banner */}
         {query.isError && (
-          <div className="shrink-0 rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+          <div className="shrink-0 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
             {query.error instanceof Error ? query.error.message : "Failed to load drugs"}
           </div>
         )}
 
-        {/* Scrollable table — grows to fill remaining space */}
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           <DrugTable drugs={query.data?.results ?? []} isLoading={query.isLoading} />
         </div>
 
-        {/* Pagination — always visible at the bottom */}
         <div className="shrink-0">
           {query.data && (
             <Pagination
