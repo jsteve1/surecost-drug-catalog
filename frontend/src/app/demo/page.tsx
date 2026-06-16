@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { AppShell } from "@/components/AppShell";
+import { BatchUploader } from "@/components/BatchUploader";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 
@@ -483,6 +484,8 @@ export default function DemoPage() {
               Clean up batch demo records
             </button>
           )}
+
+          <BatchUploader />
         </div>
 
         <div className="space-y-3">
