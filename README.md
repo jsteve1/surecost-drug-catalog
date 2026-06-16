@@ -113,7 +113,7 @@ The application is deployed as:
 | Component | URL | How |
 |-----------|-----|-----|
 | **Frontend** | https://app.gaspartech.com | GitHub Pages static export (this repo's `develop` → `pages.yml`) |
-| **API** | https://api.gaspartech.com | Django on the self-hosted server, via Cloudflare named tunnel |
+| **API** | https://api.gaspartech.com | Django on a self-hosted server, via Cloudflare named tunnel |
 
 **Important:** The live demo is **available only while the self-hosted server is running** the Django backend and `cloudflared`. If the API is unreachable the frontend will show an error banner.
 

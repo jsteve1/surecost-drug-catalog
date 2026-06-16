@@ -17,7 +17,7 @@ flowchart LR
         E4[E11 Compose + Docs]
     end
 
-    subgraph Delivery["Phase 2 — Delivery (Claude on server)"]
+    subgraph Delivery["Phase 2 — Delivery (Claude Code)"]
         E18[E18 Versions + Docker]
         E19[E19 GitHub repo]
         E20[E20 API tests]
@@ -48,7 +48,7 @@ flowchart LR
 
 ## SDLC workflow
 
-Every story follows the same gate defined in [`AGENTS.md`](../AGENTS.md) and [`SDLC.md`](../SDLC.md):
+Every story follows the same gate defined in [`AGENTS.md`](../AGENTS.md):
 
 ```mermaid
 flowchart TD
@@ -58,7 +58,7 @@ flowchart TD
     VERIFY[Run verify steps\npytest / lint / build / manual]
     AC{All acceptance_criteria met?}
     COMMIT[Conventional commit\nfeat: / fix: / test: / docs:]
-    SDLC[Update SDLC.md traceability]
+    SDLC[Update traceability]
     DONE[Story Done]
 
     SPEC --> READY
@@ -72,7 +72,7 @@ flowchart TD
     SDLC --> DONE
 ```
 
-**Source of truth:** [`spec.md`](../spec.md) is immutable for the original MVP backlog. Post-MVP work was added via [`spec_addendum.md`](../spec_addendum.md) (delivery) and [`spec_addendum_2.md`](../spec_addendum_2.md) (stretch execution).
+**Source of truth:** [`spec.md`](../spec.md) is immutable for the original MVP backlog. Post-MVP work was tracked in spec addenda; the stretch-execution backlog is [`spec_addendum_2.md`](../spec_addendum_2.md).
 
 ---
 
@@ -82,15 +82,15 @@ flowchart TD
 flowchart TB
     HUMAN[Human — product owner / reviewer]
     CURSOR[Cursor Composer / Auto\nMVP E1–E11]
-    CLAUDE[Claude Code on self-hosted server\nE18–E23 delivery]
+    CLAUDE[Claude Code (self-hosted)\nE18–E23 delivery]
     AGENTS[Parallel sub-agents\nE24+ stretch]
     CI[GitHub Actions CI\nruff + pytest + eslint + build]
     LIVE[Live demo\napp.gaspartech.com + api.gaspartech.com]
 
-    HUMAN -->|BUILD_WITH_CURSOR.md kickoff| CURSOR
-    CURSOR -->|buildout.md session| MVP[MVP complete]
+    HUMAN -->|kickoff brief| CURSOR
+    CURSOR -->|build session| MVP[MVP complete]
     HUMAN -->|delivery phase| CLAUDE
-    CLAUDE -->|claude-session-surecost-demo.txt| DELIVERY[Pages + tunnel + dark mode]
+    CLAUDE -->|delivery session| DELIVERY[Pages + tunnel + dark mode]
     HUMAN -->|stretch phase| AGENTS
     AGENTS --> STRETCH[DEA + audit + batch + tests]
     MVP --> CI
@@ -101,26 +101,10 @@ flowchart TB
 
 | Phase | Primary tool | Artifact |
 |-------|--------------|----------|
-| MVP (E1–E11) | Cursor Agent | [`buildout.md`](../buildout.md) |
-| Delivery (E18–E23) | Claude Code on self-hosted server | [`claude-session-surecost-demo.txt`](../claude-session-surecost-demo.txt) |
-| Handoff | Documentation | [`HANDOFF.md`](../HANDOFF.md) |
+| MVP (E1–E11) | Cursor Agent | Cursor build session |
+| Delivery (E18–E23) | Claude Code (self-hosted) | delivery session log |
+| Handoff | Documentation | internal handoff notes |
 | Stretch (E24+) | Cursor sub-agents | [`spec_addendum_2.md`](../spec_addendum_2.md) |
-
----
-
-## Delivery-phase commits (reference)
-
-| SHA | Message |
-|-----|---------|
-| `562df01` | chore(E18): reconcile versions, verify Docker, triage stretch epics |
-| `01cfa54` | test(E20): add comprehensive API test suite (42 tests) |
-| `d920667` | feat(E21): add GitHub Actions CI |
-| `1167a18` | feat(E22+E23.F1): static export + Pages workflow + CORS |
-| `f4318a7` | docs(E23): mark E23 Done — live domains |
-| `eb9f78c` | feat: dark mode, API demo page, manufacturer filter fix |
-| `fb427e1` | feat: page-size selector + scrollable table |
-| `b4e6bd7` | fix: CI lint failures |
-| `d7d4ffd` | docs: agent handoff document |
 
 ---
 
@@ -158,9 +142,8 @@ The live demo intentionally uses an **open API** (no auth) for evaluator access.
 
 | Concern | Location |
 |---------|----------|
-| Build recipe | `spec.md`, `spec_addendum*.md` |
+| Build recipe | `spec.md`, `spec_addendum_2.md` |
 | Operating rules | `AGENTS.md` |
-| Process spine | `SDLC.md` |
 | Backend API | `backend/drugs/` |
 | Frontend UI | `frontend/src/` |
 | Seed data (109 records) | `seed_drugs.json` |

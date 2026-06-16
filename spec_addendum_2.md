@@ -1,6 +1,6 @@
 # SureCost Drug Catalog — Specification Addendum 2 (Stretch Execution & Submission Polish)
 
-This addendum extends [`spec.md`](spec.md) and [`spec_addendum.md`](spec_addendum.md) with **stretch epic execution** (implementing deferred E12–E16 from `spec.md`), **submission UI polish**, **architecture documentation**, and a **Project Summary** page in the app navbar.
+This addendum extends [`spec.md`](spec.md) with **stretch epic execution** (implementing deferred E12–E16 from `spec.md`), **submission UI polish**, **architecture documentation**, and a **Project Summary** page in the app navbar.
 
 It uses the **same JSON schema** as `spec.md` (epics → features → stories → subtasks, each with `depends_on`, `acceptance_criteria`, and `verify`).
 
@@ -14,7 +14,7 @@ It uses the **same JSON schema** as `spec.md` (epics → features → stories �
 
 **Preconditions**
 
-- E1–E11 (MVP) and E18–E23 (delivery) are **Done** per `SDLC.md`.
+- E1–E11 (MVP) and E18–E23 (delivery) are **Done**.
 - CI green on `develop`; live demo at `app.gaspartech.com` / `api.gaspartech.com`.
 - Do **not** implement production auth, WAF, or Postgres migration on the server — document those in `docs/PRODUCTION_HOSTING.md` only.
 
@@ -24,7 +24,7 @@ It uses the **same JSON schema** as `spec.md` (epics → features → stories �
 {
   "project_name": "SureCost Drug Catalog — Stretch Execution & Submission Polish",
   "desc": "Implement deferred stretch features (DEA UI, audit log, batch ingest, frontend tests), submission UI polish (neutral dark gray theme, custom scrollbars, pointer cursors, DEA badge overflow), architecture docs with mermaid diagrams, and a Project Summary page in the navbar.",
-  "extends": ["spec.md", "spec_addendum.md"],
+  "extends": ["spec.md"],
   "domain_contract_changes": "none",
   "epics": [
     {
@@ -484,7 +484,7 @@ It uses the **same JSON schema** as `spec.md` (epics → features → stories �
                 "Mermaid: epic timeline (E1-E11 MVP, E18-E23 delivery, E24+ stretch)",
                 "Mermaid: SDLC workflow (spec → implement → verify → commit)",
                 "Mermaid: tool/agent usage (Cursor MVP, Claude delivery, evaluation)",
-                "References buildout.md, claude-session, HANDOFF.md, commit SHAs from delivery phase",
+                "References the delivery-phase build journey and commit history",
                 "Describes AI-assisted development honestly per AI_NOTES.md"
               ],
               "subtasks": [

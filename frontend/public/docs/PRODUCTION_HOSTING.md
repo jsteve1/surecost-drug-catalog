@@ -10,7 +10,7 @@
 
 | Tier | Name | Auth | Database | Availability | Monthly cost (order of magnitude) | Complexity |
 |------|------|------|----------|--------------|-----------------------------------|------------|
-| **0** | Current demo | None (open API) | SQLite on self-hosted | Best-effort; server-dependent | ~$0 (existing hardware + free tiers) | Low |
+| **0** | Current demo | None (open API) | SQLite on self-hosted node | Best-effort; single-node | ~$0 (existing hardware + free tiers) | Low |
 | **1** | Small production | API keys or basic auth behind reverse proxy | PostgreSQL on same VPS | Single-node; manual failover | $20–80 (one VPS + domain) | Low–medium |
 | **2** | Mid-scale | OAuth 2.0 / JWT + API keys for integrations | Managed RDS / Cloud SQL | Multi-replica; rolling deploys | $200–2,000+ | Medium–high |
 | **3** | Enterprise / HIPAA | mTLS + SSO (SAML/OIDC); no public write API | Managed Postgres with encryption at rest | Multi-AZ, autoscaling, CDN | $2,000–20,000+ | High |
@@ -39,7 +39,7 @@ flowchart LR
         TUN["Named tunnel<br/>cloudflared"]
     end
 
-    subgraph Homelab["self-hosted server"]
+    subgraph SelfHosted["Self-hosted server"]
         GUN["gunicorn :8100<br/>systemd user service"]
         DJ["Django + DRF"]
         SQL["SQLite prod.sqlite3"]
@@ -61,7 +61,7 @@ flowchart LR
 |-----------|------------|-------|
 | Frontend | GitHub Pages static export | Deployed by `.github/workflows/pages.yml` on push to `develop` |
 | Frontend domain | `app.gaspartech.com` | CNAME in `frontend/public/CNAME` |
-| API edge | Cloudflare named tunnel | `cloudflared` systemd service on self-hosted |
+| API edge | Cloudflare named tunnel | `cloudflared` systemd service on the self-hosted server |
 | API process | gunicorn on port 8100 | `surecost-backend.service` (systemd user unit) |
 | Database | SQLite | Single-file `backend/prod.sqlite3`; not ideal for concurrent writes |
 | CI | GitHub Actions | `ci.yml`: ruff, pytest (42 tests), eslint, build, Docker image build |
@@ -78,13 +78,13 @@ SQLite suits a single-process demo with low write concurrency. Docker Compose lo
 ### Availability
 
 - **Frontend:** High — GitHub Pages CDN is always on.
-- **Backend:** Best-effort — depends on self-hosted uptime, gunicorn health, and tunnel connectivity. If the server reboots without the systemd service, the API is unreachable while the static UI may still load and show network errors.
+- **Backend:** Best-effort — depends on server uptime, gunicorn health, and tunnel connectivity. If the server reboots without the systemd service, the API is unreachable while the static UI may still load and show network errors.
 
 ### Cost and complexity tradeoffs
 
 | Advantage | Limitation |
 |-----------|------------|
-| Near-zero incremental hosting cost | No SLA; single point of failure on self-hosted |
+| Near-zero incremental hosting cost | No SLA; single point of failure (single node) |
 | Fast to stand up for a take-home demo | SQLite limits concurrent writers |
 | No secrets management overhead for API auth | Open write API is unsuitable for real PHI or production catalog data |
 | CI and Pages are free for public/private repos | `NEXT_PUBLIC_API_URL` is build-time — API domain changes require redeploy |
@@ -368,7 +368,6 @@ flowchart LR
 
 | Document | Relevance |
 |----------|-----------|
-| [`HANDOFF.md`](../HANDOFF.md) | Live stack details, systemd services, known operational issues |
 | [`AI_NOTES.md`](../AI_NOTES.md) | Rationale for open API on the demo |
 | [`docker-compose.yml`](../docker-compose.yml) | Reference Postgres + full-stack layout for Tier 1 |
 | [`spec.md`](../spec.md) | API contract and domain invariants (unchanged across tiers) |

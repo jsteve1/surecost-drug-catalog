@@ -29,7 +29,7 @@ Overall, AI accelerated the MVP substantially; human-specified invariants (NDC f
 
 **Docker (E18.F2):** Docker was not pre-installed on the self-hosted server. Installed `docker.io` + `docker-compose-plugin` via apt and ran `docker compose up --build` to satisfy E11's Definition-of-Done item 7.
 
-**Stretch epics E12–E17 (E18.F3):** See SDLC.md for per-epic dispositions.
+**Stretch epics E12–E17 (E18.F3):** Deferred at delivery (E15 superseded by E20); later implemented in the E24–E32 stretch execution.
 
 **Public API (E23):** The API is intentionally **open** (no auth) for the demo. Anyone with the URL can read or write. Risk acknowledged; optional Cloudflare rate-limiting recommended for production. The live demo depends on the self-hosted server running the backend and `cloudflared`.
 
