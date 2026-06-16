@@ -101,7 +101,7 @@ interface CardProps {
   onRun: () => void;
 }
 
-function DemoCard({ id, method, title, url, note, body, result, running, disabled, disabledReason, onRun }: CardProps) {
+function DemoCard({ method, title, url, note, body, result, running, disabled, disabledReason, onRun }: CardProps) {
   const displayUrl = url.replace(API_BASE, "");
 
   return (

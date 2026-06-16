@@ -10,15 +10,19 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue>({ dark: false, toggle: () => {} });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
+  // Lazy initializer: reads browser APIs once at mount. Returns false during
+  // the static-export build (window is undefined in Node) so SSR is safe.
+  const [dark, setDark] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
     const saved = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const isDark = saved ? saved === "dark" : prefersDark;
-    setDark(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
-  }, []);
+    return saved ? saved === "dark" : prefersDark;
+  });
+
+  // Sync DOM class whenever dark changes — no setState call here.
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
 
   const toggle = () => {
     setDark((prev) => {
