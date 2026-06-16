@@ -79,6 +79,7 @@ function serializeDrugQuery(
 ): Record<string, string | number | undefined> {
   const query: Record<string, string | number | undefined> = {
     page: params.page,
+    page_size: params.page_size,
     search: params.search,
     manufacturer: params.manufacturer,
     dosage_form: params.dosage_form,

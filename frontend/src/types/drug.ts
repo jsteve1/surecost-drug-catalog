@@ -32,6 +32,7 @@ export interface PaginatedResponse<T> {
 
 export interface DrugQueryParams {
   page?: number;
+  page_size?: number;
   search?: string;
   manufacturer?: string;
   dosage_form?: string;
